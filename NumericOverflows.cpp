@@ -2,7 +2,7 @@
 //
 
 #include <iostream>     // std::cout
-#include <limits>       // std::numeric_limits
+#include <climits>       // std::numeric_limits
 
 /// <summary>
 /// Template function to abstract away the logic of:
@@ -20,9 +20,17 @@ T add_numbers(T const& start, T const& increment, unsigned long int const& steps
 
     for (unsigned long int i = 0; i < steps; ++i)
     {
+     
+        // check for overflow during addition, if detected return -1
+        if ((increment >= 0) && (result > std::numeric_limits<T>::max() - increment))
+        {
+            result = -1;
+            break;
+        }
         result += increment;
+        
     }
-
+    
     return result;
 }
 
@@ -43,12 +51,22 @@ T subtract_numbers(T const& start, T const& decrement, unsigned long int const& 
 
     for (unsigned long int i = 0; i < steps; ++i)
     {
+    
+        
+        // check for overflow during subtraction, if detected, return -1
+        if ((decrement > 0) && (result < std::numeric_limits<T>::min() + decrement))
+        {
+            result = -1;
+            break;
+        }
+
         result -= decrement;
+    
+        
     }
 
     return result;
 }
-
 
 //  NOTE:
 //    You will see the unary ('+') operator used in front of the variables in the test_XXX methods.
@@ -92,7 +110,17 @@ void test_overflow()
 
     std::cout << "\tAdding Numbers With Overflow (" << +start << ", " << +increment << ", " << (steps + 1) << ") = ";
     result = add_numbers<T>(start, increment, steps + 1);
-    std::cout << +result << std::endl;
+    
+    // if result = -1 or modulo arthimetic = 1 (for unsigned variables), overflow occured, print to console.
+    if (result == - 1) {
+        std::cout << "Overflow occured" << std::endl;
+        
+    }
+    // check for unsigned values
+    if (int(result) % 2 == 1) {
+        std::cout << "Overflow occured" << std::endl;
+    }
+    
 }
 
 template <typename T>
@@ -133,7 +161,15 @@ void test_underflow()
 
     std::cout << "\tSubtracting Numbers With Overflow (" << +start << ", " << +decrement << ", " << (steps + 1) << ") = ";
     result = subtract_numbers<T>(start, decrement, steps + 1);
-    std::cout << +result << std::endl;
+    
+    // if result equals -1, or modulo arthemetic equals 1 (for unsigned variables) overflow has occured, print to console
+    if (result == -1)  {
+        std::cout << "Underflow occured" << std::endl;
+    }
+    if ((int(result) * -1 % 2 == 1) || (int(result) % 2 == 1)) {
+        std::cout << "Underflow occured" << std::endl;
+    }
+    
 }
 
 void do_overflow_tests(const std::string& star_line)
@@ -216,3 +252,4 @@ int main()
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
+
